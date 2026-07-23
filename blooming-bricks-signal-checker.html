@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blooming Bricks Signal Checker</title>
+  <style>
+    :root {
+      --wm-blue: #031c30;
+      --wm-teal: #0b6f75;
+      --wm-gold: #d9a441;
+      --wm-green: #517d4b;
+      --wm-red: #9a3e35;
+      --ink: #172331;
+      --muted: #5f6b78;
+      --line: #d9e0e6;
+      --soft: #f5f7f9;
+      --paper: #ffffff;
+      --focus: #2c7be5;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #eef2f5;
+      font-family: Calibri, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.42;
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 44px;
+    }
+
+    header {
+      background: var(--wm-blue);
+      color: #fff;
+      padding: 28px;
+      border-left: 8px solid var(--wm-gold);
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+
+    h1 {
+      font-size: 34px;
+      max-width: 880px;
+    }
+
+    h2 {
+      font-size: 24px;
+      color: var(--wm-blue);
+    }
+
+    h3 {
+      font-size: 18px;
+      color: var(--wm-blue);
+    }
+
+    p {
+      margin: 0;
+    }
+
+    .eyebrow {
+      margin-bottom: 10px;
+      color: #dbe7ef;
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .header-copy {
+      max-width: 920px;
+      margin-top: 12px;
+      color: #eaf0f4;
+      font-size: 18px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .grid.two {
+      grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .section {
+      margin-top: 22px;
+      padding: 24px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .section-heading p {
+      max-width: 680px;
+      color: var(--muted);
+    }
+
+    .summary-band {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: var(--line);
+    }
+
+    .summary-tile {
+      min-height: 128px;
+      padding: 18px;
+      background: var(--paper);
+    }
+
+    .summary-tile strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--wm-blue);
+      font-size: 17px;
+    }
+
+    .stance {
+      margin-top: 16px;
+      padding: 18px;
+      color: #fff;
+      background: var(--wm-blue);
+      border-left: 8px solid var(--wm-gold);
+      font-size: 20px;
+      line-height: 1.3;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 28px;
+      padding: 4px 9px;
+      border: 1px solid var(--line);
+      background: var(--soft);
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .tag::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--muted);
+    }
+
+    .tag.confirmed::before {
+      background: var(--wm-green);
+    }
+
+    .tag.directional::before {
+      background: var(--wm-gold);
+    }
+
+    .tag.validation::before {
+      background: var(--wm-red);
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    button,
+    select,
+    textarea,
+    input[type="text"] {
+      font: inherit;
+    }
+
+    button {
+      min-height: 38px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--wm-blue);
+      cursor: pointer;
+    }
+
+    button:hover,
+    button[aria-pressed="true"] {
+      color: #fff;
+      background: var(--wm-blue);
+      border-color: var(--wm-blue);
+    }
+
+    button:focus,
+    select:focus,
+    textarea:focus,
+    input[type="text"]:focus {
+      outline: 3px solid color-mix(in srgb, var(--focus) 35%, transparent);
+      outline-offset: 2px;
+    }
+
+    .signal-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .signal-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 176px;
+      gap: 14px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+    }
+
+    .signal-card.is-hidden {
+      display: none;
+    }
+
+    .signal-card h3 {
+      margin-bottom: 8px;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .signal-detail {
+      margin-top: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .detail-row {
+      display: grid;
+      grid-template-columns: 120px minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    .detail-row span:first-child {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .confidence-rail {
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .mini-scale {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      height: 12px;
+    }
+
+    .mini-scale span {
+      background: var(--line);
+    }
+
+    .signal-card[data-tag="Confirmed"] .mini-scale span:nth-child(1),
+    .signal-card[data-tag="Directional"] .mini-scale span:nth-child(-n+2),
+    .signal-card[data-tag="Needs validation"] .mini-scale span {
+      background: var(--wm-blue);
+    }
+
+    .checklist {
+      display: grid;
+      gap: 10px;
+    }
+
+    .check-item {
+      display: grid;
+      grid-template-columns: 30px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border: 1px solid var(--line);
+      background: var(--soft);
+    }
+
+    .check-item input {
+      width: 19px;
+      height: 19px;
+      margin-top: 2px;
+      accent-color: var(--wm-blue);
+    }
+
+    .checker {
+      display: grid;
+      gap: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    label {
+      color: var(--wm-blue);
+      font-weight: 700;
+    }
+
+    textarea,
+    input[type="text"],
+    select {
+      width: 100%;
+      min-height: 40px;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      color: var(--ink);
+      background: #fff;
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .result-panel {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      border-left: 6px solid var(--wm-teal);
+      background: var(--soft);
+    }
+
+    .result-panel.warning {
+      border-left-color: var(--wm-gold);
+    }
+
+    .result-panel.risk {
+      border-left-color: var(--wm-red);
+    }
+
+    .output-box {
+      padding: 12px;
+      border: 1px solid var(--line);
+      background: #fff;
+      white-space: pre-wrap;
+    }
+
+    .source-list {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .source-list li {
+      margin: 6px 0;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 920px) {
+      .grid.two,
+      .grid.three,
+      .summary-band {
+        grid-template-columns: 1fr;
+      }
+
+      .signal-card {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 620px) {
+      main {
+        width: min(100% - 18px, 1180px);
+        padding-top: 12px;
+      }
+
+      header,
+      .section {
+        padding: 18px;
+      }
+
+      h1 {
+        font-size: 27px;
+      }
+
+      .section-heading {
+        display: grid;
+      }
+
+      .detail-row {
+        grid-template-columns: 1fr;
+        gap: 2px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="eyebrow">Blooming Bricks Botanical Launch</div>
+      <h1>Signal Checker for Marta's Operating Review</h1>
+      <p class="header-copy">A compact executive summary, evidence-ranked signal list, validation checklist, and lightweight Codex review helper built from the local Blooming Bricks case materials.</p>
+    </header>
+
+    <section class="section" aria-labelledby="exec-summary">
+      <div class="section-heading">
+        <div>
+          <h2 id="exec-summary">Executive Summary</h2>
+        </div>
+        <p>Use this as the operating stance: momentum is credible, but the case materials do not yet support a broad scale-up or a clean-win message.</p>
+      </div>
+
+      <div class="summary-band" aria-label="Executive summary tiles">
+        <article class="summary-tile">
+          <strong>What looks promising</strong>
+          <p>Mini sets, gifting moments, collector displays, build videos, positive design feedback, and specialty retailer interest all point to early launch traction.</p>
+        </article>
+        <article class="summary-tile">
+          <strong>What is not proven</strong>
+          <p>Profitability, promotion dependency, repeat purchase intent, true inventory availability, packaging impact, and channel readiness still need validation.</p>
+        </article>
+        <article class="summary-tile">
+          <strong>How leaders should act</strong>
+          <p>Preserve the demand story while gating larger marketing, replenishment, and channel commitments behind focused data checks.</p>
+        </article>
+      </div>
+
+      <div class="stance">
+        The Botanical Launch is showing promising early momentum, but margin quality, promotional dependency, inventory reliability, channel performance, packaging impacts, and repeat-purchase potential must be validated before leadership declares a clean win.
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="signals">
+      <div class="section-heading">
+        <div>
+          <h2 id="signals">Signal List and Confidence Tags</h2>
+        </div>
+        <p>Tags follow the guide: <span class="tag confirmed">Confirmed</span> means supported by materials or data, <span class="tag directional">Directional</span> means suggested by early patterns, and <span class="tag validation">Needs validation</span> means important but incomplete or conflicting.</p>
+      </div>
+
+      <div class="filters" role="group" aria-label="Filter signals by confidence">
+        <button type="button" data-filter="All" aria-pressed="true">All signals</button>
+        <button type="button" data-filter="Confirmed" aria-pressed="false">Confirmed</button>
+        <button type="button" data-filter="Directional" aria-pressed="false">Directional</button>
+        <button type="button" data-filter="Needs validation" aria-pressed="false">Needs validation</button>
+      </div>
+
+      <div id="signal-list" class="signal-list"></div>
+    </section>
+
+    <section class="section" aria-labelledby="validation">
+      <div class="section-heading">
+        <div>
+          <h2 id="validation">Validation Checklist</h2>
+        </div>
+        <p>Before a claim appears in Marta's readout, it should pass these pressure tests from the operating review guide.</p>
+      </div>
+
+      <div class="grid two">
+        <div class="checklist" id="validation-checklist"></div>
+        <div class="result-panel" id="checklist-status" aria-live="polite">
+          <h3>Readout readiness</h3>
+          <p id="readiness-text">No checks completed yet. Start with evidence and confidence before drafting stronger claims.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="codex-checker">
+      <div class="section-heading">
+        <div>
+          <h2 id="codex-checker">Lightweight Codex Signal Checker</h2>
+        </div>
+        <p>Paste a proposed operating-review claim, choose the closest signal area, and generate a tighter version with a confidence tag, caveat, validation step, and reusable Codex prompt.</p>
+      </div>
+
+      <div class="grid two">
+        <form class="checker" id="claim-form">
+          <div class="field">
+            <label for="claim">Proposed claim</label>
+            <textarea id="claim" placeholder="Example: The Botanical Launch is a clear win because mini sets are selling quickly."></textarea>
+          </div>
+          <div class="field">
+            <label for="signal-select">Closest signal area</label>
+            <select id="signal-select"></select>
+          </div>
+          <button type="submit">Check claim</button>
+        </form>
+
+        <aside class="result-panel warning" id="claim-output" aria-live="polite">
+          <h3>Checker output</h3>
+          <p>Enter a claim to pressure-test whether it is supported, directional, or needs validation.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="sources">
+      <div class="section-heading">
+        <div>
+          <h2 id="sources">Source Context Used</h2>
+        </div>
+        <p>The checker is built only from the local fictional training materials in this folder.</p>
+      </div>
+      <ul class="source-list">
+        <li><strong>Blooming_Bricks_Case_Packet.docx:</strong> case setup, AI delivery loop, tool map, and launch signal checker expectations.</li>
+        <li><strong>Blooming_Bricks_Operating_Review_Brief.docx:</strong> confidence tag definitions, readout stance, and pressure-test checklist.</li>
+        <li><strong>Blooming_Bricks_Stakeholder_Notes.docx:</strong> functional concerns, launch tensions, and discovery questions.</li>
+        <li><strong>Blooming_Bricks_Project_Intelligence_Handout.docx:</strong> grounding rules, safe-context guidance, and synthesis prompts.</li>
+        <li><strong>Blooming_Bricks_Executive_Summary_and_Context.md:</strong> consolidated Move 1 and Move 2 project context.</li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    const signals = [
+      {
+        area: "Launch stance",
+        tag: "Confirmed",
+        signal: "The case materials explicitly frame the launch as promising but not yet a clean win.",
+        evidence: "Case packet and operating review brief both name the central tension and required readout stance.",
+        caveat: "This confirms the stance of the exercise, not the launch's actual quantitative performance.",
+        validation: "Use this as the top-line framing while validating each business claim underneath it."
+      },
+      {
+        area: "Mini sets and gifting",
+        tag: "Directional",
+        signal: "Mini sets and gift-oriented moments appear to be resonating with target buyers.",
+        evidence: "Stakeholder notes cite fast mini-set movement and strong botanical theme fit with adult hobbyists and gift buyers.",
+        caveat: "Fast movement may be affected by price, promotion, mix, or early novelty.",
+        validation: "Cut units, revenue, margin, promotion depth, and repeat indicators by SKU and channel."
+      },
+      {
+        area: "Marketing engagement",
+        tag: "Directional",
+        signal: "Organic engagement is strongest around build videos, collector displays, and gifting moments.",
+        evidence: "Marketing notes identify these creative themes as the strongest engagement areas.",
+        caveat: "Social enthusiasm does not prove profitable, durable demand.",
+        validation: "Separate organic engagement, paid-media effect, conversion, and repeat-purchase indicators."
+      },
+      {
+        area: "Finance and margin",
+        tag: "Needs validation",
+        signal: "Average order value appears healthy, but economics may be distorted by promotions, bundles, and lower-margin mix.",
+        evidence: "Finance notes flag higher launch-weekend promotion depth, thin mini-set margin, and bundle effects.",
+        caveat: "The available materials do not include a clean channel-level margin view.",
+        validation: "Reconcile AOV, discounting, bundle attach, product mix, and contribution margin by channel."
+      },
+      {
+        area: "Inventory reliability",
+        tag: "Needs validation",
+        signal: "Inventory availability appears uneven, but some stockout flags may be timing issues.",
+        evidence: "Operations notes cite regional unevenness and two feeds that lag by a day.",
+        caveat: "Delayed feeds can make inventory risk look broader or more acute than it is.",
+        validation: "Verify stockouts by SKU, region, store format, and feed timestamp before recommending replenishment or rush freight."
+      },
+      {
+        area: "Retail channel interest",
+        tag: "Directional",
+        signal: "Specialty retailers show reorder and exclusive-variant interest, while mass retail wants steadier sell-through.",
+        evidence: "Sales notes distinguish specialty demand from mass retail space decisions.",
+        caveat: "Retailer interest is not the same as confirmed reorder quality or scalable channel health.",
+        validation: "Separate confirmed orders from inquiries, conditional expansion, exclusivity interest, and channel-specific sell-through."
+      },
+      {
+        area: "Customer experience",
+        tag: "Directional",
+        signal: "Customer sentiment is mostly positive, with packaging and instruction concerns that may be concentrated.",
+        evidence: "Customer Care notes cite praise for design and display value, plus packaging sensitivity among collectors and dense floral instruction concerns.",
+        caveat: "The materials do not quantify frequency, severity, product concentration, or replacement cost.",
+        validation: "Quantify issue rate, severity, affected products, customer segment, replacement cost, and trend."
+      },
+      {
+        area: "Operating readiness",
+        tag: "Needs validation",
+        signal: "Demand-generation enthusiasm may be ahead of supply, fulfillment, and service confidence.",
+        evidence: "Marta is sensitive to gaps between marketing enthusiasm and operating readiness; Operations wants validation before broader replenishment.",
+        caveat: "This is an inference from stakeholder tension, not a final operating diagnosis.",
+        validation: "Run a readiness check across inventory accuracy, replenishment lead time, packaging risk, support capacity, and demand push timing."
+      }
+    ];
+
+    const checklist = [
+      {
+        label: "Evidence",
+        question: "Can we point to the material or data behind this claim?"
+      },
+      {
+        label: "Confidence",
+        question: "Have we tagged this as confirmed, directional, or needing validation?"
+      },
+      {
+        label: "Overstatement",
+        question: "Would a leader reasonably think this is more certain than it is?"
+      },
+      {
+        label: "Business implication",
+        question: "Does the point explain why the signal matters?"
+      },
+      {
+        label: "Human ownership",
+        question: "Does the final recommendation remain with the team, not AI?"
+      },
+      {
+        label: "Next action",
+        question: "Is there a practical validation item, decision, or follow-up?"
+      }
+    ];
+
+    const tagClass = {
+      "Confirmed": "confirmed",
+      "Directional": "directional",
+      "Needs validation": "validation"
+    };
+
+    const signalList = document.getElementById("signal-list");
+    const filterButtons = Array.from(document.querySelectorAll("[data-filter]"));
+    const signalSelect = document.getElementById("signal-select");
+    const claimForm = document.getElementById("claim-form");
+    const claimOutput = document.getElementById("claim-output");
+    const checklistEl = document.getElementById("validation-checklist");
+    const readinessText = document.getElementById("readiness-text");
+    const checklistStatus = document.getElementById("checklist-status");
+
+    function renderSignals(filter = "All") {
+      signalList.innerHTML = "";
+      signals.forEach((item) => {
+        const card = document.createElement("article");
+        card.className = "signal-card";
+        card.dataset.tag = item.tag;
+        if (filter !== "All" && item.tag !== filter) {
+          card.classList.add("is-hidden");
+        }
+
+        card.innerHTML = `
+          <div>
+            <h3>${item.area}</h3>
+            <p>${item.signal}</p>
+            <div class="signal-detail">
+              <div class="detail-row"><span>Evidence</span><p>${item.evidence}</p></div>
+              <div class="detail-row"><span>Caveat</span><p>${item.caveat}</p></div>
+              <div class="detail-row"><span>Validate</span><p>${item.validation}</p></div>
+            </div>
+          </div>
+          <div class="confidence-rail">
+            <span class="tag ${tagClass[item.tag]}">${item.tag}</span>
+            <div class="mini-scale" aria-hidden="true"><span></span><span></span><span></span></div>
+            <p class="meta">Confidence should rise only after the validation item is addressed.</p>
+          </div>
+        `;
+        signalList.appendChild(card);
+      });
+    }
+
+    function renderSelectOptions() {
+      signalSelect.innerHTML = signals.map((item, index) => `<option value="${index}">${item.area}</option>`).join("");
+    }
+
+    function renderChecklist() {
+      checklistEl.innerHTML = "";
+      checklist.forEach((item, index) => {
+        const id = `check-${index}`;
+        const row = document.createElement("label");
+        row.className = "check-item";
+        row.setAttribute("for", id);
+        row.innerHTML = `
+          <input type="checkbox" id="${id}">
+          <span><strong>${item.label}:</strong> ${item.question}</span>
+        `;
+        checklistEl.appendChild(row);
+      });
+      checklistEl.addEventListener("change", updateReadiness);
+    }
+
+    function updateReadiness() {
+      const checked = checklistEl.querySelectorAll("input:checked").length;
+      const total = checklist.length;
+      checklistStatus.classList.remove("warning", "risk");
+      if (checked < 3) {
+        checklistStatus.classList.add("risk");
+        readinessText.textContent = `${checked} of ${total} checks complete. The claim is not ready for leadership language yet. Start with evidence, confidence, and overstatement.`;
+      } else if (checked < total) {
+        checklistStatus.classList.add("warning");
+        readinessText.textContent = `${checked} of ${total} checks complete. The claim can be shaped as a caveated signal, but it still needs a clearer validation action.`;
+      } else {
+        readinessText.textContent = `${checked} of ${total} checks complete. The claim is ready to draft as leader-facing language, with the confidence tag and validation action still visible.`;
+      }
+    }
+
+    function softenClaim(claim, selectedSignal) {
+      const riskyTerms = [
+        "clean win",
+        "clear win",
+        "proves",
+        "proven",
+        "definitive",
+        "guaranteed",
+        "all channels",
+        "broad scale",
+        "scale-up",
+        "healthy profitability",
+        "durable demand"
+      ];
+      const lowered = claim.toLowerCase();
+      const matched = riskyTerms.filter((term) => lowered.includes(term));
+      const startsWithSignal = selectedSignal.tag === "Needs validation" ? "Needs validation" : selectedSignal.tag;
+      const tag = matched.length ? "Needs validation" : startsWithSignal;
+      const suggested = `${selectedSignal.area} shows ${selectedSignal.tag === "Confirmed" ? "a supported operating-review frame" : "an early signal"}: ${selectedSignal.signal} Marta can share this carefully if she pairs it with the caveat and next validation step.`;
+
+      return {
+        tag,
+        matched,
+        suggested
+      };
+    }
+
+    function buildPrompt(claim, selectedSignal, tag) {
+      return `You are helping a West Monroe delivery team support Blooming Bricks' Botanical Launch. Pressure-test this proposed operating-review claim: "${claim || "[paste claim here]"}". Closest signal area: ${selectedSignal.area}. Current confidence tag: ${tag}. Use only the provided Blooming Bricks materials. Return: 1) supported facts, 2) directional signals, 3) overstatements to soften, 4) caveat language, 5) validation step, and 6) what Marta should not conclude yet.`;
+    }
+
+    claimForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const claim = document.getElementById("claim").value.trim();
+      const selectedSignal = signals[Number(signalSelect.value)];
+      const review = softenClaim(claim, selectedSignal);
+      const panelClass = review.tag === "Needs validation" ? "risk" : review.tag === "Directional" ? "warning" : "";
+      claimOutput.className = `result-panel ${panelClass}`;
+
+      const riskLine = review.matched.length
+        ? `Potential overstatement terms found: ${review.matched.join(", ")}.`
+        : "No obvious overstatement terms found, but the claim still needs source review.";
+
+      claimOutput.innerHTML = `
+        <h3>Checker output</h3>
+        <p><span class="tag ${tagClass[review.tag]}">${review.tag}</span></p>
+        <p><strong>Assessment:</strong> ${riskLine}</p>
+        <p><strong>Softer leader-ready language:</strong> ${review.suggested}</p>
+        <p><strong>Caveat:</strong> ${selectedSignal.caveat}</p>
+        <p><strong>Validation step:</strong> ${selectedSignal.validation}</p>
+        <div>
+          <strong>Reusable Codex prompt</strong>
+          <div class="output-box">${buildPrompt(claim, selectedSignal, review.tag)}</div>
+        </div>
+      `;
+    });
+
+    filterButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const filter = button.dataset.filter;
+        filterButtons.forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+        renderSignals(filter);
+      });
+    });
+
+    renderSignals();
+    renderSelectOptions();
+    renderChecklist();
+  </script>
+</body>
+</html>
